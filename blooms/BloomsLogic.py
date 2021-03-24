@@ -97,31 +97,18 @@ class Board:
         :param player: 0 or 1 to denote the player in question.
         :return: the list of all legal moves for the given player.
         """
-        # Get the channels where the positions of the player's different colour stones are stored
         colour1, colour2 = self.colours[player]
-        c1, c2 = colour1 - 1, colour2 - 1
-
-        # Convert the board to a 2D representation where each index (q, r) is
-        # 1 if there is a piece on that space or 0 otherwise.
-        flattened_board = np.sum(self.board, axis=0)
-
-        # Find the list of empty spaces
-        empty_spaces = []
-        for r in range(flattened_board.shape[2]):
-            for q in range(flattened_board.shape[1]):
-                if self.is_valid_space((q, r)):
-                    # (q, r) is a valid space
-                    if flattened_board[r][q] == 0:
-                        # The space is empty
-                        empty_spaces.append((q, r))
-
-        # Generate all possible one stone moves
+        empty_spaces = self.get_empty_spaces()
         moves = []
-        moves += [[(q, r, c1), ()] for (q, r) in empty_spaces]  # All possible one stone moves of Colour 0
-        moves += [[(q, r, c2), ()] for (q, r) in empty_spaces]  # All possible one stone moves of Colour 1
+
+        # Add all possible one stone moves of the player's 1st colour
+        moves += [[(q, r, colour1), ()] for (q, r) in empty_spaces]
+
+        # Add all possible one stone moves of the player's 2nd colour
+        moves += [[(q, r, colour2), ()] for (q, r) in empty_spaces]
 
         # Generate all possible two stone moves
-        moves += [[(m1[0], m1[1], c1), (m2[0], m2[1], c2)] for (m1, m2) in permutations(empty_spaces, r=2)]
+        moves += [[(m1[0], m1[1], colour1), (m2[0], m2[1], colour2)] for (m1, m2) in permutations(empty_spaces, r=2)]
 
         return moves
 

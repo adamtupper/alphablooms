@@ -2,6 +2,8 @@
 """
 from .context import blooms
 
+from itertools import permutations
+
 import numpy as np
 import pytest
 
@@ -169,3 +171,21 @@ def test_has_legal_moves_none():
     board.board_2d = np.ones(board.board_2d.shape)
 
     assert not board.has_legal_moves()
+
+
+def test_get_legal_moves():
+    """Check that the function generates all possible moves when the board is
+    empty.
+    """
+    board = Board()
+
+    empty_spaces = board.get_empty_spaces()
+    legal_moves = board.get_legal_moves(player=0)
+
+    for space in empty_spaces:
+        q, r = space
+        assert [(q, r, 1), ()] in legal_moves
+        assert [(q, r, 2), ()] in legal_moves
+
+    for (space1, space2) in permutations(empty_spaces, r=2):
+        assert [(space1[0], space1[1], 1), (space2[0], space2[1], 2)] in legal_moves
