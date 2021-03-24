@@ -133,20 +133,12 @@ class Board:
 
         :return: True if there are legal moves, False otherwise.
         """
-
-
-        # Convert the board to a 2D representation where each index (q, r) is
-        # 1 if there is a piece on that space or 0 otherwise.
-        flattened_board = np.sum(self.board, axis=0)
-
         # Check each index (q, r) to see if it is empty.
         for r in range(self.board_2d.shape[0]):
             for q in range(self.board_2d.shape[1]):
-                if self.is_valid_space((q, r)):
-                    # (q, r) is a valid space
-                    if flattened_board[r][q] == 0:
-                        # The space is empty
-                        return True
+                if self.is_valid_space((q, r)) and self.board_2d[r][q] == 0:
+                    # (q, r) is a valid space and is empty
+                    return True
 
     def is_win(self, player):
         """A player wins if they reach the target number of captures.

@@ -143,3 +143,29 @@ def test_is_valid_space_valid():
     board = Board()
 
     assert board.is_valid_space((3, 3))
+
+
+def test_has_legal_moves_some():
+    """Check the function correctly returns that there are legal moves when the
+    board is not.
+    """
+    n = 4
+    board = Board(size=n)
+
+    # Add a stone to the board for good measure
+    board.board_2d[3, 3] = 1
+
+    assert board.has_legal_moves()
+
+
+def test_has_legal_moves_none():
+    """Check the function correctly returns that there are no legal moves when
+    the board is full.
+    """
+    n = 4
+    board = Board(size=n)
+
+    # Populate the board with stones of Colour 1
+    board.board_2d = np.ones(board.board_2d.shape)
+
+    assert not board.has_legal_moves()
