@@ -101,7 +101,7 @@ def test_place_stone_invalid_position():
         board.place_stone(position, colour=1)
 
 
-def test_get_3d_board():
+def test_get_board_3d():
     """Check that the the 2D board representation is successfully converted into
     a 3D representation.
     """
@@ -113,7 +113,7 @@ def test_get_3d_board():
     board.place_stone(position=(0, 6), colour=3)
     board.place_stone(position=(3, 6), colour=4)
 
-    board_3d = board.get_3d_board()
+    board_3d = board.get_board_3d()
 
     assert board_3d.shape == (4, 7, 7)
     assert np.count_nonzero(board_3d) == 4
@@ -122,3 +122,24 @@ def test_get_3d_board():
     assert board_3d[2, 6, 0] == 1
     assert board_3d[3, 6, 3] == 1
 
+
+def test_is_valid_space_invalid():
+    """Check that all invalid spaces on a base 4 board are correctly identified
+    as invalid.
+    """
+    board = Board()
+
+    invalid_spaces = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (2, 0),
+                      (4, 6), (5, 5), (5, 6), (6, 4), (6, 5), (6, 6)]
+
+    for space in invalid_spaces:
+        assert not board.is_valid_space(space)
+
+
+def test_is_valid_space_valid():
+    """Check that a valid space on a base 4 board isn't misclassified as an
+    invalid space.
+    """
+    board = Board()
+
+    assert board.is_valid_space((3, 3))

@@ -24,11 +24,10 @@ class Board:
         self.size = size
         self.score_target = score_target
         self.captures = [0, 0]
-        # self.board = np.zeros((4, 2 * self.size - 1, 2 * self.size - 1))
         self.board_2d = np.zeros((2 * self.size - 1, 2 * self.size - 1))
         self.colours = [(1, 2), (3, 4)]
 
-    def get_3d_board(self):
+    def get_board_3d(self):
         """Converts the board representation into a 3D representation, where
         each channel stores the pieces of a different colour. This
         representation is used as input to a CNN.
@@ -51,13 +50,27 @@ class Board:
         empty_spaces = []
         for r in range(self.board_2d.shape[0]):
             for q in range(self.board_2d.shape[1]):
-                if (q + r >= self.size - 1) and (4 * self.size - 4 - q - r >= self.size - 1):
-                    # (q, r) is a valid space
-                    if self.board_2d[r][q] == 0:
-                        # The space is empty
-                        empty_spaces.append((q, r))
+                if self.is_valid_space((q, r)) and self.board_2d[r][q] == 0:
+                    # (q, r) is a valid space and is empty
+                    empty_spaces.append((q, r))
 
         return empty_spaces
+
+    def is_valid_space(self, position):
+        """Check to see if the given position is a valid space on the board.
+
+        Because of the hexagonal shape of the board, some elements of the 2D
+        board representation are not spaces on the board.
+
+        :param position:  A tuple representing the (q, r) coord to place the
+            stone.
+        :return: True if the given position is a valid space, False otherwise.
+        """
+        q, r = position
+        not_in_top_left = q + r >= self.size - 1
+        not_in_bottom_right = 4 * self.size - 4 - q - r >= self.size - 1
+
+        return not_in_top_left and not_in_bottom_right
 
     def place_stone(self, position, colour):
         """Place a stone on the board.
@@ -69,11 +82,10 @@ class Board:
         q, r = position
 
         # Check the position is valid and empty
-        assert (q + r >= self.size - 1) and (4 * self.size - 4 - q - r >= self.size - 1)
+        assert self.is_valid_space(position)
         assert self.board_2d[r, q] == 0
 
         self.board_2d[r, q] = colour
-
 
     def get_legal_moves(self, player):
         """Returns all the legal moves for the given player.
@@ -97,7 +109,7 @@ class Board:
         empty_spaces = []
         for r in range(flattened_board.shape[2]):
             for q in range(flattened_board.shape[1]):
-                if (q + r >= self.size - 1) and (4 * self.size - 4 - q - r >= self.size - 1):
+                if self.is_valid_space((q, r)):
                     # (q, r) is a valid space
                     if flattened_board[r][q] == 0:
                         # The space is empty
@@ -121,14 +133,16 @@ class Board:
 
         :return: True if there are legal moves, False otherwise.
         """
+
+
         # Convert the board to a 2D representation where each index (q, r) is
         # 1 if there is a piece on that space or 0 otherwise.
         flattened_board = np.sum(self.board, axis=0)
 
         # Check each index (q, r) to see if it is empty.
-        for r in range(flattened_board.shape[1]):
-            for q in range(flattened_board.shape[0]):
-                if (q + r >= self.size - 1) and (4 * self.size - 4 - q - r >= self.size - 1):
+        for r in range(self.board_2d.shape[0]):
+            for q in range(self.board_2d.shape[1]):
+                if self.is_valid_space((q, r)):
                     # (q, r) is a valid space
                     if flattened_board[r][q] == 0:
                         # The space is empty
@@ -165,7 +179,7 @@ class Board:
         blooms = []
         for r in range(board_2d.shape[1]):
             for q in range(board_2d.shape[0]):
-                if (q + r >= self.size - 1) and (4 * self.size - 4 - q - r >= self.size - 1):
+                if self.is_valid_space((q, r)):
                     # (q, r) is a valid space
                     if board_2d[r, q] > 0:
                         if not any(((q, r) in bloom for bloom in blooms)):
@@ -178,3 +192,4 @@ class Board:
         """A recursive function for finding all stones that belong to the same
         bloom as te stone at the given position.
         """
+        raise NotImplementedError
