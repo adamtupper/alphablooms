@@ -166,9 +166,44 @@ class Board:
 
 
         # Remove any fenced blooms (and increment the # of captured stones)
+        pass
 
-    def add_neighbours(self, bloom, colour, position):
+    def get_neighbours(self, position):
+        """Return a list of the neighbouring positions to the given position.
+
+        :param position: A tuple representing the (q, r) coord to place the
+            stone.
+        :return: A list of the neighbouring positions.
+        """
+        q, r = position
+        axial_directions = [(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)]
+
+        neighbours = []
+        for dq, dr in axial_directions:
+            neighbour = (q + dq, r + dr)
+            if self.is_valid_space(neighbour):
+                neighbours.append(neighbour)
+
+        return neighbours
+
+    def find_bloom_members(self, bloom, colour, position):
         """A recursive function for finding all stones that belong to the same
         bloom as te stone at the given position.
+
+        :param bloom: A set of all stones in the bloom (on the first call this
+            is empty).
+        :param colour: The colour of the bloom.
+        :param position: The position to start the search for other bloom
+            members from.
+        :return: The set of all positions with a stone in the bloom.
         """
-        raise NotImplementedError
+        neighbours = self.get_neighbours(position)
+        neighbours = {n for n in neighbours if self.board_2d[n[1], n[0]] == colour and n not in bloom}
+
+        if not neighbours:
+            return bloom
+        else:
+            bloom |= neighbours
+            for neighbour in neighbours:
+                bloom |= self.find_bloom_members(bloom, colour, neighbour)
+            return bloom

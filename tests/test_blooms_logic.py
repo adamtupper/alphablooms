@@ -189,3 +189,49 @@ def test_get_legal_moves():
 
     for (space1, space2) in permutations(empty_spaces, r=2):
         assert [(space1[0], space1[1], 1), (space2[0], space2[1], 2)] in legal_moves
+
+
+def test_get_neighbours_center():
+    """Check that the correct neighbours are returned for the central position.
+    """
+    board = Board()
+
+    expected_neighbours = [(3, 2), (4, 2), (4, 3), (3, 4), (2, 4), (2, 3)]
+    actual_neighbours = board.get_neighbours(position=(3, 3))
+
+    assert len(actual_neighbours) == len(expected_neighbours)
+    assert set(actual_neighbours) == set(expected_neighbours)
+
+
+def test_get_neighbours_edge():
+    """Check that the correct neighbours are returned for an edge position.
+    """
+    board = Board()
+
+    expected_neighbours = [(3, 6), (3, 5), (4, 4), (5, 4)]
+    actual_neighbours = board.get_neighbours(position=(4, 5))
+
+    assert len(actual_neighbours) == len(expected_neighbours)
+    assert set(actual_neighbours) == set(expected_neighbours)
+
+
+def test_find_bloom_members():
+    """Check that the function correctly identifies all members of a bloom.
+    """
+    board = Board()
+
+    # Add a bloom
+    board.place_stone(position=(3, 2), colour=1)
+    board.place_stone(position=(3, 3), colour=1)
+    board.place_stone(position=(3, 4), colour=1)
+    board.place_stone(position=(4, 3), colour=1)
+
+    # Add an additional neighbouring stone of a different colour (that is not
+    # part of the bloom).
+    board.place_stone(position=(4, 2), colour=2)
+
+    expected_bloom = [(3, 2), (3, 3), (3, 4), (4, 3)]
+    actual_bloom = board.find_bloom_members(bloom=set(), colour=1, position=(3, 2))
+
+    assert len(actual_bloom) == len(expected_bloom)
+    assert set(actual_bloom) == set(expected_bloom)
