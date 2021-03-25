@@ -165,12 +165,14 @@ class Board:
 
         :param move: the move to be performed. A tuple of the form
             (r coord, q coord, channel).
-        :param player: the player performing the move (0 or 1).
+        :param player: the player performing the move (0 or 1). player is
+            actually unused, but is required for interfacing with the Alpha Zero
+            General library.
         """
         # Place the stones
         for placement in move:
             if placement:  # Must check this because some moves place only one stone
-                q, r, colour = move
+                q, r, colour = placement
                 self.board_2d[r, q] = colour
 
         # Identify blooms
@@ -182,7 +184,7 @@ class Board:
                     if not any(((q, r) in bloom for bloom in blooms)):
                         # If the stone is not a member of a currently known bloom
                         colour = self.board_2d[r, q]
-                        bloom = self.find_bloom_members({}, colour, (q, r))
+                        bloom = self.find_bloom_members({(q, r)}, colour, (q, r))
                         blooms.append(bloom)
 
         # Remove any fenced blooms (and increment the # of captured stones)
@@ -190,14 +192,18 @@ class Board:
             if self.is_fenced(bloom):
                 bloom = list(bloom)
 
-                # TODO: Remove bloom from the board
+                # Remove stones from the board
+                for position in bloom:
+                    self.remove_stone(position)
 
                 # Update captures
                 bloom_colour = self.board_2d[bloom[0][1], bloom[0][0]]
                 if bloom_colour in (1, 2):
-                    self.captures[0] += len(bloom)
-                else:
+                    # Bloom belongs to Player 1, so increment Player 2's captures
                     self.captures[1] += len(bloom)
+                else:
+                    # Bloom belongs to Player 2, so increment Player 1's captures
+                    self.captures[0] += len(bloom)
 
     def is_fenced(self, bloom):
         """Check to see if the given bloom is fenced.

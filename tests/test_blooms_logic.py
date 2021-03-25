@@ -346,3 +346,41 @@ def test_is_fenced_false():
     board.remove_stone(position=(4, 4))
 
     assert not board.is_fenced(bloom)
+
+
+def test_execute_move_no_captures():
+    """Check that the function performs correctly for a situation where there
+    are no captures.
+    """
+    board = Board()
+
+    # Initialise the board with some stones
+    board.place_stone((6, 2), colour=1)
+    board.place_stone((6, 3), colour=3)
+    board.place_stone((5, 4), colour=1)
+
+    moves = [(5, 3, 3), (4, 4, 4)]
+    board.execute_move(moves, player=1)
+
+    assert board.board_2d[3, 5] == 3
+    assert board.board_2d[4, 4] == 4
+    assert board.captures == [0, 0]
+
+
+def test_execute_move_one_capture():
+    """Check that the function performs correctly for a situation where there
+    is one stone captured.
+    """
+    board = Board()
+
+    # Initialise the board with some stones
+    board.place_stone((6, 2), colour=1)
+    board.place_stone((6, 3), colour=3)
+    board.place_stone((5, 4), colour=1)
+
+    moves = [(5, 3, 2), (4, 4, 1)]
+    board.execute_move(moves, player=0)
+
+    assert board.board_2d[3, 5] == 2
+    assert board.board_2d[4, 4] == 1
+    assert board.captures == [1, 0]
