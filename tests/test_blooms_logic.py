@@ -138,6 +138,15 @@ def test_is_valid_space_invalid():
         assert not board.is_valid_space(space)
 
 
+def test_is_valid_space_out_of_range():
+    """Check that a position outside the range of the board array is classified
+    as invalid.
+    """
+    board = Board()
+
+    assert not board.is_valid_space((7, 2))
+
+
 def test_is_valid_space_valid():
     """Check that a valid space on a base 4 board isn't misclassified as an
     invalid space.
@@ -235,3 +244,105 @@ def test_find_bloom_members():
 
     assert len(actual_bloom) == len(expected_bloom)
     assert set(actual_bloom) == set(expected_bloom)
+
+
+def test_is_empty_space_empty():
+    """Check that empty spaces are correctly identified.
+    """
+    board = Board()
+    assert board.is_empty_space(position=(3, 3))
+
+
+def test_is_empty_space_filled():
+    """Check that empty spaces are correctly identified.
+    """
+    board = Board()
+    board.place_stone(position=(3, 3), colour=1)
+
+    assert not board.is_empty_space(position=(3, 3))
+
+
+def test_remove_stone_valid():
+    """Check that the function removes a stone from the board (when there is
+    one present.
+    """
+    board = Board()
+    board.place_stone(position=(3, 3), colour=1)
+    board.remove_stone(position=(3, 3))
+
+    assert board.is_empty_space(position=(3, 3))
+
+
+def test_remove_stone_invalid():
+    """Check that the function raises an error when there is no stone to be
+    removed.
+    """
+    board = Board()
+
+    with pytest.raises(AssertionError):
+        board.remove_stone(position=(3, 3))
+
+
+def test_is_fenced_middle():
+    """Check that the function correctly classifies a fenced bloom in the middle
+    of the board.
+    """
+    board = Board()
+
+    # Add a bloom
+    bloom = [(3, 2), (3, 3), (3, 4), (4, 3)]
+    for position in bloom:
+        board.place_stone(position, colour=1)
+
+    # Fence the bloom
+    for position in bloom:
+        neighbours = board.get_neighbours(position)
+        for neighbour in neighbours:
+            if board.is_empty_space(neighbour):
+                board.place_stone(neighbour, colour=2)
+
+    assert board.is_fenced(bloom)
+
+
+def test_is_fenced_edge():
+    """Check that the function correctly classifies a fenced bloom at the edge
+    of the board.
+    """
+    board = Board()
+
+    # Add a bloom
+    bloom = [(6, 3), (5, 4)]
+    for position in bloom:
+        board.place_stone(position, colour=1)
+
+    # Fence the bloom
+    for position in bloom:
+        neighbours = board.get_neighbours(position)
+        for neighbour in neighbours:
+            if board.is_empty_space(neighbour):
+                board.place_stone(neighbour, colour=2)
+
+    assert board.is_fenced(bloom)
+
+
+def test_is_fenced_false():
+    """Check that the function correctly classifies a non-fenced bloom.
+    """
+    board = Board()
+
+    # Add a bloom
+    bloom = [(3, 2), (3, 3), (3, 4), (4, 3)]
+    for position in bloom:
+        board.place_stone(position, colour=1)
+
+    # Fence the bloom
+    for position in bloom:
+        neighbours = board.get_neighbours(position)
+        for neighbour in neighbours:
+            if board.is_empty_space(neighbour):
+                board.place_stone(neighbour, colour=2)
+
+    # Remove one of the stones fencing in the bloom
+    board.remove_stone(position=(4, 4))
+
+    assert not board.is_fenced(bloom)

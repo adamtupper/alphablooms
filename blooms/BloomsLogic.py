@@ -62,15 +62,27 @@ class Board:
         Because of the hexagonal shape of the board, some elements of the 2D
         board representation are not spaces on the board.
 
-        :param position:  A tuple representing the (q, r) coord to place the
+        :param position: A tuple representing the (q, r) coord to place the
             stone.
         :return: True if the given position is a valid space, False otherwise.
         """
         q, r = position
+        q_in_range = 0 <= q < 2 * self.size - 1
+        r_in_range = 0 <= r < 2 * self.size - 1
         not_in_top_left = q + r >= self.size - 1
         not_in_bottom_right = 4 * self.size - 4 - q - r >= self.size - 1
 
-        return not_in_top_left and not_in_bottom_right
+        return q_in_range and r_in_range and not_in_top_left and not_in_bottom_right
+
+    def is_empty_space(self, position):
+        """Check to see if a space is empty.
+
+        :param position: A tuple representing the (q, r) coord to place the
+            stone.
+        :return: True if the given position is empty, False otherwise.
+        """
+        q, r = position
+        return self.board_2d[r, q] == 0
 
     def place_stone(self, position, colour):
         """Place a stone on the board.
@@ -86,6 +98,19 @@ class Board:
         assert self.board_2d[r, q] == 0
 
         self.board_2d[r, q] = colour
+
+    def remove_stone(self, position):
+        """Remove a stone from the board.
+
+        :param position: A tuple representing the (q, r) coord to place the
+            stone.
+        """
+        q, r = position
+
+        # Check that there is a stone at the given position
+        assert not self.is_empty_space(position)
+
+        self.board_2d[r, q] = 0
 
     def get_legal_moves(self, player):
         """Returns all the legal moves for the given player.
@@ -145,28 +170,48 @@ class Board:
         # Place the stones
         for placement in move:
             if placement:  # Must check this because some moves place only one stone
-                q, r, c = move
-                self.board[c, q, r] = 1
-
-        # Transform the board into a 2D representation
-        board_2d = np.copy(self.board)
-        for c in range(board_2d.shape[0]):
-            board_2d[c, :, :] *= c + 1
-        board_2d = np.sum(board_2d, axis=0)
+                q, r, colour = move
+                self.board_2d[r, q] = colour
 
         # Identify blooms
         blooms = []
-        for r in range(board_2d.shape[1]):
-            for q in range(board_2d.shape[0]):
-                if self.is_valid_space((q, r)):
-                    # (q, r) is a valid space
-                    if board_2d[r, q] > 0:
-                        if not any(((q, r) in bloom for bloom in blooms)):
-                            bloom = [(q, r)]
-
+        for r in range(self.board_2d.shape[1]):
+            for q in range(self.board_2d.shape[0]):
+                if self.is_valid_space((q, r)) and self.board_2d[r, q] > 0:
+                    # (q, r) is a valid, non-empty space
+                    if not any(((q, r) in bloom for bloom in blooms)):
+                        # If the stone is not a member of a currently known bloom
+                        colour = self.board_2d[r, q]
+                        bloom = self.find_bloom_members({}, colour, (q, r))
+                        blooms.append(bloom)
 
         # Remove any fenced blooms (and increment the # of captured stones)
-        pass
+        for bloom in blooms:
+            if self.is_fenced(bloom):
+                bloom = list(bloom)
+
+                # TODO: Remove bloom from the board
+
+                # Update captures
+                bloom_colour = self.board_2d[bloom[0][1], bloom[0][0]]
+                if bloom_colour in (1, 2):
+                    self.captures[0] += len(bloom)
+                else:
+                    self.captures[1] += len(bloom)
+
+    def is_fenced(self, bloom):
+        """Check to see if the given bloom is fenced.
+
+        :param bloom: A list of the positions that make up the bloom.
+        :return: True if the bloom is fenced, False otherwise.
+        """
+        for position in bloom:
+            for q, r in self.get_neighbours(position):
+                if self.board_2d[r, q] == 0:
+                    # A neighbouring position is empty
+                    return False
+
+        return True
 
     def get_neighbours(self, position):
         """Return a list of the neighbouring positions to the given position.
