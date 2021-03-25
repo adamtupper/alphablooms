@@ -50,7 +50,7 @@ class Board:
         empty_spaces = []
         for r in range(self.board_2d.shape[0]):
             for q in range(self.board_2d.shape[1]):
-                if self.is_valid_space((q, r)) and self.board_2d[r][q] == 0:
+                if self.is_valid_space((q, r)) and self.is_empty_space((q, r)):
                     # (q, r) is a valid space and is empty
                     empty_spaces.append((q, r))
 
