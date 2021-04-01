@@ -152,6 +152,29 @@ class Board:
                     # (q, r) is a valid space and is empty
                     return True
 
+    def is_legal_move(self, move):
+        """Check to see if the given move is legal.
+        :param move: the move to be performed. A tuple of the form
+            ((q coord, r coord, colour), (q coord, r coord, colour)) or
+            ((q coord, r coord, colour), ()).
+        """
+        if move[1]:
+            # The move consists of two placements
+            diff_colour = move[0][2] != move[1][2]
+
+            # The space for the first stone is empty
+            position1 = (move[0][0], move[0][1])
+            space1_empty = self.is_empty_space(position1)
+
+            # The space for the second stone is empty
+            position2 = (move[1][0], move[1][1])
+            space2_empty = self.is_empty_space(position2)
+
+            return diff_colour and space1_empty and space2_empty
+        else:
+            position = (move[0][0], move[0][1])
+            return self.is_empty_space(position)
+
     def is_win(self, player):
         """A player wins if they reach the target number of captures.
 
@@ -164,7 +187,8 @@ class Board:
         """Perform the given move on the board.
 
         :param move: the move to be performed. A tuple of the form
-            (r coord, q coord, channel).
+            ((q coord, r coord, colour), (q coord, r coord, colour)) or
+            ((q coord, r coord, colour), ()).
         :param player: the player performing the move (0 or 1). player is
             actually unused, but is required for interfacing with the Alpha Zero
             General library.

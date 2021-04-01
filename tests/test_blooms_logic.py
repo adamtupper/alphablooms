@@ -384,3 +384,69 @@ def test_execute_move_one_capture():
     assert board.board_2d[3, 5] == 2
     assert board.board_2d[4, 4] == 1
     assert board.captures == [1, 0]
+
+
+def test_is_legal_move_false_one_stone_non_empty_space():
+    """Check that a one stone move is illegal if the space is not empty.
+    """
+    board = Board()
+
+    # Initialise the board with a stone
+    board.place_stone((6, 2), colour=1)
+
+    move = [(6, 2, 1), ()]
+    assert not board.is_legal_move(move)
+
+
+def test_is_legal_move_false_two_stones_same_colour():
+    """Check that a two stone move is illegal if the stones are the same colour.
+    """
+    board = Board()
+
+    move = [(6, 2, 1), (6, 3, 1)]
+    assert not board.is_legal_move(move)
+
+
+def test_is_legal_move_false_two_stones_one_non_empty_space():
+    """Check that a two stone move is illegal if one of the desired spaces is
+    not empty.
+    """
+    board = Board()
+
+    # Initialise the board with a stone
+    board.place_stone((6, 2), colour=1)
+
+    move = [(6, 2, 1), (6, 3, 2)]
+    assert not board.is_legal_move(move)
+
+
+def test_is_legal_move_false_two_stones_two_non_empty_spaces():
+    """Check that a two stone move is illegal if both of the desired spaces are
+    not empty.
+    """
+    board = Board()
+
+    # Initialise the board with a stone
+    board.place_stone((6, 2), colour=1)
+    board.place_stone((6, 3), colour=1)
+
+    move = [(6, 2, 1), (6, 3, 2)]
+    assert not board.is_legal_move(move)
+
+
+def test_is_legal_move_true_one_stone():
+    """Check that a valid one stone move is legal.
+    """
+    board = Board()
+
+    move = [(6, 2, 1), ()]
+    assert board.is_legal_move(move)
+
+
+def test_is_legal_move_true_two_stones():
+    """Check that a valid two stone move is legal.
+    """
+    board = Board()
+
+    move = [(6, 2, 1), (6, 3, 2)]
+    assert board.is_legal_move(move)
