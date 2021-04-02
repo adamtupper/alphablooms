@@ -96,8 +96,6 @@ def test_get_next_state_valid_move():
     move = [(6, 2, 2), ()]
     next_board, next_player = game.getNextState(board, player, action=move)
 
-    print(next_board.board_2d)
-
     next_board.board_2d
     for r in range(next_board.board_2d.shape[0]):
         for q in range(next_board.board_2d.shape[1]):
