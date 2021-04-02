@@ -27,6 +27,23 @@ class Board:
         self.board_2d = np.zeros((2 * self.size - 1, 2 * self.size - 1))
         self.colours = [(1, 2), (3, 4)]
 
+        self.move_map_player_0 = self.build_move_map(player=0)
+        self.move_map_player_1 = self.build_move_map(player=1)
+
+    def build_move_map(self, player):
+        """Build a dictionary that specifies the index of each possible move
+        in a binary move vector.
+
+        :param player: 0 or 1 to denote the player in question.
+        :return: a dictionary which maps all possible moves that can be many by
+            the player to a unique index that can be used to build a binary
+            vector of valid moves.
+        """
+        all_moves = self.get_legal_moves(player)
+        move_map = {m: i for i, m in enumerate(all_moves)}
+
+        return move_map
+
     def get_board_3d(self):
         """Converts the board representation into a 3D representation, where
         each channel stores the pieces of a different colour. This
@@ -127,13 +144,13 @@ class Board:
         moves = []
 
         # Add all possible one stone moves of the player's 1st colour
-        moves += [[(q, r, colour1), ()] for (q, r) in empty_spaces]
+        moves += [((q, r, colour1), ()) for (q, r) in empty_spaces]
 
         # Add all possible one stone moves of the player's 2nd colour
-        moves += [[(q, r, colour2), ()] for (q, r) in empty_spaces]
+        moves += [((q, r, colour2), ()) for (q, r) in empty_spaces]
 
         # Generate all possible two stone moves
-        moves += [[(m1[0], m1[1], colour1), (m2[0], m2[1], colour2)] for (m1, m2) in permutations(empty_spaces, r=2)]
+        moves += [((m1[0], m1[1], colour1), (m2[0], m2[1], colour2)) for (m1, m2) in permutations(empty_spaces, r=2)]
 
         return moves
 

@@ -1,5 +1,6 @@
 """Game class for Blooms.
 """
+import numpy as np
 from scipy.special import perm
 
 from blooms.Game import Game  # TODO: Replace with AlphaZero General import
@@ -69,7 +70,19 @@ class BloomsGame(Game):
                         moves that are valid from the current board and player,
                         0 for invalid moves
         """
-        pass
+        player = 0 if player == -1 else 1
+        valid_moves = board.get_legal_moves(player)
+
+        valid_moves_vec = np.zeros(int(self.getActionSize()))
+        for move in valid_moves:
+            if player == 0:
+                move_idx = board.move_map_player_0[move]
+            else:
+                move_idx = board.move_map_player_1[move]
+
+            valid_moves_vec[move_idx] = 1
+
+        return valid_moves_vec
 
     def getGameEnded(self, board, player):
         """

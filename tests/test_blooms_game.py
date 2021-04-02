@@ -105,3 +105,14 @@ def test_get_next_state_valid_move():
                 assert next_board.board_2d[r, q] == 0
 
     assert next_player == -player
+
+
+def test_get_valid_moves():
+    """Test that the valid moves vector is correctly built.
+    """
+    game = BloomsGame(size=4)
+    board = game.getInitBoard()
+
+    valid_moves = game.getValidMoves(board, player=-1)
+    assert len(valid_moves) == game.getActionSize()
+    assert np.all((valid_moves == 0) | (valid_moves == 1))

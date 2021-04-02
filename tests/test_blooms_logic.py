@@ -193,11 +193,11 @@ def test_get_legal_moves():
 
     for space in empty_spaces:
         q, r = space
-        assert [(q, r, 1), ()] in legal_moves
-        assert [(q, r, 2), ()] in legal_moves
+        assert ((q, r, 1), ()) in legal_moves
+        assert ((q, r, 2), ()) in legal_moves
 
     for (space1, space2) in permutations(empty_spaces, r=2):
-        assert [(space1[0], space1[1], 1), (space2[0], space2[1], 2)] in legal_moves
+        assert ((space1[0], space1[1], 1), (space2[0], space2[1], 2)) in legal_moves
 
 
 def test_get_neighbours_center():
@@ -450,3 +450,21 @@ def test_is_legal_move_true_two_stones():
 
     move = [(6, 2, 1), (6, 3, 2)]
     assert board.is_legal_move(move)
+
+
+def test_build_move_map():
+    """Check that the move map is being built correctly.
+    """
+    board = Board()
+
+    # Player 0
+    moves = board.get_legal_moves(player=0)
+    assert len(board.move_map_player_0) == len(moves)
+    assert all([type(v) == int for v in board.move_map_player_0.values()])
+    assert all([type(k) == tuple for k in board.move_map_player_0.keys()])
+
+    # Player 1
+    moves = board.get_legal_moves(player=1)
+    assert len(board.move_map_player_1) == len(moves)
+    assert all([type(v) == int for v in board.move_map_player_1.values()])
+    assert all([type(k) == tuple for k in board.move_map_player_1.keys()])
