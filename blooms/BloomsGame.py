@@ -94,7 +94,23 @@ class BloomsGame(Game):
                small non-zero value for draw.
 
         """
-        pass
+        player = 0 if player == -1 else 1
+        opponent = 0 if player == 1 else 1
+
+        winning_state = board.is_win(player)
+        losing_state = board.is_win(opponent)
+
+        if winning_state:
+            return 1.0
+        elif losing_state:
+            return -1.0
+        elif board.has_legal_moves():
+            # The game is still ongoing
+            return 0.0
+        else:
+            # The game is a draw
+            # TODO: Investigate whether the size of this "small" value matters
+            return 1e-4
 
     def getCanonicalForm(self, board, player):
         """

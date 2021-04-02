@@ -3,6 +3,7 @@
 from .context import blooms
 
 import numpy as np
+import pytest
 from scipy.special import perm
 
 from blooms.BloomsGame import BloomsGame
@@ -116,3 +117,49 @@ def test_get_valid_moves():
     valid_moves = game.getValidMoves(board, player=-1)
     assert len(valid_moves) == game.getActionSize()
     assert np.all((valid_moves == 0) | (valid_moves == 1))
+
+
+def test_get_game_ended_win():
+    """Check that the function correctly signals a win.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Set the number of captures for Player -1/0 to 15
+    board.captures[0] = 15
+
+    assert game.getGameEnded(board, player=-1) == 1.0
+
+
+def test_get_game_ended_loss():
+    """Check that the function correctly signals a loss.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Set the number of captures for Player 1 (i.e. the opponent) to 15
+    board.captures[1] = 15
+
+    assert game.getGameEnded(board, player=-1) == -1.0
+
+
+def test_get_game_ended_ongoing():
+    """Check that the function correctly signals an ongoing game.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    assert game.getGameEnded(board, player=-1) == 0.0
+
+
+def test_get_game_ended_draw():
+    """Check that the function correctly signals a draw.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Fill the board
+    for position in board.get_empty_spaces():
+        board.place_stone(position=position, colour=1)
+
+    assert game.getGameEnded(board, player=-1) == pytest.approx(1e-4)
