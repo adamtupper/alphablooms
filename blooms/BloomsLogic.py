@@ -2,7 +2,9 @@
 """
 from itertools import permutations
 
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import RegularPolygon
 
 
 class Board:
@@ -299,3 +301,45 @@ class Board:
             for neighbour in neighbours:
                 bloom |= self.find_bloom_members(bloom, colour, neighbour)
             return bloom
+
+    @staticmethod
+    def axial_to_pixel(q, r):
+        """Convert axial coordinates to pixel (i.e. cartesian coordinates).
+        """
+        x = np.sqrt(3) * q + np.sqrt(3) / 2 * r
+        y = 3 / 2 * r
+
+        return x, y
+
+    def visualise(self, show_coords=False):
+        """Visualise the state of the board using matplotlib.
+
+        :param show_coords: Whether or not to annotate each space with its axial
+            coordinates.
+        """
+
+        fig, ax = plt.subplots(1)
+        ax.set_aspect('equal')
+
+        for q in range(0, self.board_2d.shape[-1]):
+            for r in range(0, self.board_2d.shape[-1]):
+                if self.is_valid_space((q, r)):
+                    x, y = self.axial_to_pixel(q, r)
+                    colour = self.board_2d[r, q]
+                    face_colour = f'C{int(colour)}' if colour else 'w'
+                    hexagon = RegularPolygon((x, y),
+                                             numVertices=6,
+                                             radius=1.75 * np.sqrt(1 / 3),
+                                             alpha=0.2,
+                                             edgecolor='k',
+                                             facecolor=face_colour)
+                    ax.add_patch(hexagon)
+
+                    if show_coords:
+                        ax.annotate(text=f'({q}, {r})',
+                                    xy=(x, y),
+                                    ha='center',
+                                    va='center')
+
+        plt.autoscale(enable=True)
+        plt.show()
