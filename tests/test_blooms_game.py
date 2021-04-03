@@ -163,3 +163,60 @@ def test_get_game_ended_draw():
         board.place_stone(position=position, colour=1)
 
     assert game.getGameEnded(board, player=-1) == pytest.approx(1e-4)
+
+
+def test_get_canonical_form_no_inversion():
+    """Check that the original board is returned when called for Player -1.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Place stones
+    board.place_stone(position=(5, 1), colour=1)
+    board.place_stone(position=(5, 2), colour=2)
+    board.place_stone(position=(1, 4), colour=3)
+    board.place_stone(position=(1, 5), colour=4)
+
+    # Update captures
+    board.captures = [5, 10]
+
+    board = game.getCanonicalForm(board, player=-1)
+
+    assert board.board_2d[1, 5] == 1
+    assert board.board_2d[2, 5] == 2
+    assert board.board_2d[4, 1] == 3
+    assert board.board_2d[5, 1] == 4
+
+    assert board.captures == [5, 10]
+
+
+def test_get_canonical_form_inversion():
+    """Check that the board is inverted (i.e. Player -1 becomes Player 1 and
+    vice-a-versa) when called for Player 1.
+    """
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Place stones
+    board.place_stone(position=(5, 1), colour=1)
+    board.place_stone(position=(5, 2), colour=2)
+    board.place_stone(position=(1, 4), colour=3)
+    board.place_stone(position=(1, 5), colour=4)
+
+    # Update captures
+    board.captures = [5, 10]
+
+    # Uncomment to visualise the inversion
+    # board.visualise()
+
+    board = game.getCanonicalForm(board, player=1)
+
+    assert board.board_2d[1, 5] == 3
+    assert board.board_2d[2, 5] == 4
+    assert board.board_2d[4, 1] == 1
+    assert board.board_2d[5, 1] == 2
+
+    assert board.captures == [10, 5]
+
+    # Uncomment to visualise the inversion
+    # board.visualise()

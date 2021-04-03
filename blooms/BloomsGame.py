@@ -113,7 +113,10 @@ class BloomsGame(Game):
             return 1e-4
 
     def getCanonicalForm(self, board, player):
-        """
+        """The canonical form of the board is from the POV of Player -1. When
+        the player is Player 1, we need to reverse the colours of the stones on
+        the board (i.e. 1 <-> 3, 2 <-> 4) and reverse the number of captures.
+
         Input:
             board: current board
             player: current player (1 or -1)
@@ -125,7 +128,29 @@ class BloomsGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
-        pass
+        if player == -1:
+            # The board is already in the right POV
+            return board
+        else:
+            # We need to switch the POV
+            board.captures.reverse()
+
+            for r in range(board.board_2d.shape[0]):
+                for q in range(board.board_2d.shape[1]):
+                    if board.board_2d[r, q] == board.colours[0][0]:
+                        # Player -1, Colour 1 -> Player 1, Colour 1
+                        board.board_2d[r, q] = board.colours[1][0]
+                    elif board.board_2d[r, q] == board.colours[0][1]:
+                        # Player -1, Colour 2 -> Player 1, Colour 2
+                        board.board_2d[r, q] = board.colours[1][1]
+                    elif board.board_2d[r, q] == board.colours[1][0]:
+                        # Player 1, Colour 1 -> Player -1, Colour 1
+                        board.board_2d[r, q] = board.colours[0][0]
+                    elif board.board_2d[r, q] == board.colours[1][1]:
+                        # Player 1, Colour 1 -> Player -1, Colour 2
+                        board.board_2d[r, q] = board.colours[0][1]
+
+            return board
 
     def getSymmetries(self, board, pi):
         """
