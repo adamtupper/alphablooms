@@ -1,8 +1,12 @@
 """A board class for the game of Blooms.
 """
+import copy
+
 from itertools import permutations
 
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import RegularPolygon
 
 
 class Board:
@@ -26,6 +30,30 @@ class Board:
         self.captures = [0, 0]
         self.board_2d = np.zeros((2 * self.size - 1, 2 * self.size - 1))
         self.colours = [(1, 2), (3, 4)]
+
+        self.move_map_player_0 = self.build_move_map(player=0)
+        self.move_map_player_1 = self.build_move_map(player=1)
+
+    def copy(self):
+        """Create and return a copy of the current board state.
+
+        :return: a copy of the board state.
+        """
+        return copy.deepcopy(self)
+
+    def build_move_map(self, player):
+        """Build a dictionary that specifies the index of each possible move
+        in a binary move vector.
+
+        :param player: 0 or 1 to denote the player in question.
+        :return: a dictionary which maps all possible moves that can be many by
+            the player to a unique index that can be used to build a binary
+            vector of valid moves.
+        """
+        all_moves = self.get_legal_moves(player)
+        move_map = {m: i for i, m in enumerate(all_moves)}
+
+        return move_map
 
     def get_board_3d(self):
         """Converts the board representation into a 3D representation, where
@@ -127,13 +155,13 @@ class Board:
         moves = []
 
         # Add all possible one stone moves of the player's 1st colour
-        moves += [[(q, r, colour1), ()] for (q, r) in empty_spaces]
+        moves += [((q, r, colour1), ()) for (q, r) in empty_spaces]
 
         # Add all possible one stone moves of the player's 2nd colour
-        moves += [[(q, r, colour2), ()] for (q, r) in empty_spaces]
+        moves += [((q, r, colour2), ()) for (q, r) in empty_spaces]
 
         # Generate all possible two stone moves
-        moves += [[(m1[0], m1[1], colour1), (m2[0], m2[1], colour2)] for (m1, m2) in permutations(empty_spaces, r=2)]
+        moves += [((m1[0], m1[1], colour1), (m2[0], m2[1], colour2)) for (m1, m2) in permutations(empty_spaces, r=2)]
 
         return moves
 
@@ -152,6 +180,29 @@ class Board:
                     # (q, r) is a valid space and is empty
                     return True
 
+    def is_legal_move(self, move):
+        """Check to see if the given move is legal.
+        :param move: the move to be performed. A tuple of the form
+            ((q coord, r coord, colour), (q coord, r coord, colour)) or
+            ((q coord, r coord, colour), ()).
+        """
+        if move[1]:
+            # The move consists of two placements
+            diff_colour = move[0][2] != move[1][2]
+
+            # The space for the first stone is empty
+            position1 = (move[0][0], move[0][1])
+            space1_empty = self.is_empty_space(position1)
+
+            # The space for the second stone is empty
+            position2 = (move[1][0], move[1][1])
+            space2_empty = self.is_empty_space(position2)
+
+            return diff_colour and space1_empty and space2_empty
+        else:
+            position = (move[0][0], move[0][1])
+            return self.is_empty_space(position)
+
     def is_win(self, player):
         """A player wins if they reach the target number of captures.
 
@@ -164,7 +215,8 @@ class Board:
         """Perform the given move on the board.
 
         :param move: the move to be performed. A tuple of the form
-            (r coord, q coord, channel).
+            ((q coord, r coord, colour), (q coord, r coord, colour)) or
+            ((q coord, r coord, colour), ()).
         :param player: the player performing the move (0 or 1). player is
             actually unused, but is required for interfacing with the Alpha Zero
             General library.
@@ -258,3 +310,85 @@ class Board:
             for neighbour in neighbours:
                 bloom |= self.find_bloom_members(bloom, colour, neighbour)
             return bloom
+
+    @staticmethod
+    def axial_to_pixel(q, r):
+        """Convert axial coordinates to pixel (i.e. cartesian coordinates).
+
+        :param q: the q coordinate.
+        :param r: the r coordinate
+
+        :return: a tuple containing the corresponding (x, y) pixel coordinates.
+        """
+        x = np.sqrt(3) * q + np.sqrt(3) / 2 * r
+        y = 3 / 2 * r
+
+        return x, y
+
+    @staticmethod
+    def axial_to_cube(q, r):
+        """Convert axial coordinates to cube coordinates.
+
+        :param q: the q coordinate.
+        :param r: the r coordinate
+
+        :return: a tuple containing the corresponding (x, y, z) cube
+            coordinates.
+        """
+        x = q
+        z = r
+        y = -x - z
+
+        return x, y, z
+
+    @staticmethod
+    def cube_to_axial(x, y, z):
+        """Convert cube coordinates to axial coordinates.
+
+        :param x: the x component of the cube coordinate.
+        :param y: the y component of the cube coordinate.
+        :param z: the z component of the cube coordinate.
+
+        :return: a tuple containing the corresponding (q, r) axial coordinates.
+        """
+        q = x
+        r = z
+
+        return q, r
+
+    def visualise(self, show_coords=False, title=""):
+        """Visualise the state of the board using matplotlib.
+
+        :param show_coords: whether or not to annotate each space with its axial
+            coordinates.
+            :param show_coords: whether or not to annotate each space with its axial
+            coordinates.
+        """
+
+        fig, ax = plt.subplots(1)
+        ax.set_aspect('equal')
+
+        for q in range(0, self.board_2d.shape[-1]):
+            for r in range(0, self.board_2d.shape[-1]):
+                if self.is_valid_space((q, r)):
+                    x, y = self.axial_to_pixel(q, r)
+                    colour = self.board_2d[r, q]
+                    face_colour = f'C{int(colour)}' if colour else 'w'
+                    hexagon = RegularPolygon((x, y),
+                                             numVertices=6,
+                                             radius=1.75 * np.sqrt(1 / 3),
+                                             alpha=0.2,
+                                             edgecolor='k',
+                                             facecolor=face_colour)
+                    ax.add_patch(hexagon)
+
+                    if show_coords:
+                        ax.annotate(text=f'({q}, {r})',
+                                    xy=(x, y),
+                                    ha='center',
+                                    va='center')
+
+        plt.title(title)
+        plt.gca().invert_yaxis()
+        plt.autoscale(enable=True)
+        plt.show()
