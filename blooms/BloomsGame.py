@@ -172,4 +172,4 @@ class BloomsGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        pass
+        return board.board_2d.tostring()
