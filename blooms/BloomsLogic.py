@@ -305,16 +305,52 @@ class Board:
     @staticmethod
     def axial_to_pixel(q, r):
         """Convert axial coordinates to pixel (i.e. cartesian coordinates).
+
+        :param q: the q coordinate.
+        :param r: the r coordinate
+
+        :return: a tuple containing the corresponding (x, y) pixel coordinates.
         """
         x = np.sqrt(3) * q + np.sqrt(3) / 2 * r
         y = 3 / 2 * r
 
         return x, y
 
+    @staticmethod
+    def axial_to_cube(q, r):
+        """Convert axial coordinates to cube coordinates.
+
+        :param q: the q coordinate.
+        :param r: the r coordinate
+
+        :return: a tuple containing the corresponding (x, y, z) cube
+            coordinates.
+        """
+        x = q
+        z = r
+        y = -x - z
+
+        return x, y, z
+
+    @staticmethod
+    def cube_to_axial(x, y, z):
+        """Convert cube coordinates to axial coordinates.
+
+        :param x: the x component of the cube coordinate.
+        :param y: the y component of the cube coordinate.
+        :param z: the z component of the cube coordinate.
+
+        :return: a tuple containing the corresponding (q, r) axial coordinates.
+        """
+        q = x
+        r = z
+
+        return q, r
+
     def visualise(self, show_coords=False):
         """Visualise the state of the board using matplotlib.
 
-        :param show_coords: Whether or not to annotate each space with its axial
+        :param show_coords: whether or not to annotate each space with its axial
             coordinates.
         """
 

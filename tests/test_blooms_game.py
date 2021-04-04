@@ -220,3 +220,10 @@ def test_get_canonical_form_inversion():
 
     # Uncomment to visualise the inversion
     # board.visualise()
+
+
+def test_get_symmetries():
+    """Check that the function correctly creates six new reflected boards and
+    policy vectors, one for each axis of symmetry.
+    """
+    pass

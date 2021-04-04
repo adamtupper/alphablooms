@@ -162,7 +162,44 @@ class BloomsGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        pass
+        transforms = [
+            # new x, new y, new z
+            (1, 0, 2),
+            (2, 1, 0),
+            (0, 2, 1)
+        ]
+
+        reflected_forms = []
+        for t in transforms:
+            for multiplier in [-1, 1]:
+                refl_board = board.copy()
+                refl_pi = pi.copy()
+
+                for q in range(board.board_2d.shape[0]):
+                    for r in range(board.board_2d.shape[0]):
+                        # Convert the position to cube coordinates
+                        cube_coord = board.axial_to_cube(q, r)
+
+                        # Apply the reflection
+                        refl_cube_coord =[multiplier*c for c in cube_coord]
+                        refl_cube_coord = [refl_cube_coord[i] for i in t]
+
+                        # Convert the reflected position to axial coordinates
+                        refl_q, refl_r = board.cube_to_axial(*refl_cube_coord)
+
+                        # Update the reflected position on the reflected board
+                        refl_board.board_2d[refl_r, refl_q] = board.board_2d[r, q]
+
+                        # Update policy vector
+                        for move, idx in board.move_map_player_0.items():
+                            # It doesn't matter which player we use since we're not interested in the colour
+                            for action in move:
+                                if action and action[0] == q and action[1] == r:
+                                    refl_pi[idx] = pi[idx]
+
+                reflected_forms.append([refl_board, refl_pi])
+
+        return reflected_forms
 
     def stringRepresentation(self, board):
         """
