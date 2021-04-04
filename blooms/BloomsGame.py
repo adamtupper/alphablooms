@@ -43,7 +43,7 @@ class BloomsGame(Game):
         n_one_stone_moves = 2 * n_spaces
         n_two_stone_moves = perm(n_spaces, 2)
 
-        return n_one_stone_moves + n_two_stone_moves
+        return int(n_one_stone_moves + n_two_stone_moves)
 
     def getNextState(self, board, player, action):
         """
@@ -162,6 +162,7 @@ class BloomsGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
+        shift = self.size - 1
         transforms = [
             # new x, new y, new z
             (1, 0, 2),
@@ -172,32 +173,45 @@ class BloomsGame(Game):
         reflected_forms = []
         for t in transforms:
             for multiplier in [-1, 1]:
-                refl_board = board.copy()
-                refl_pi = pi.copy()
+                for n_rotations in range(0, 6):
+                    refl_board = board.copy()
+                    refl_pi = pi.copy()
 
-                for q in range(board.board_2d.shape[0]):
-                    for r in range(board.board_2d.shape[0]):
-                        # Convert the position to cube coordinates
-                        cube_coord = board.axial_to_cube(q, r)
+                    for q in range(board.board_2d.shape[0]):
+                        for r in range(board.board_2d.shape[0]):
+                            if board.is_valid_space(position=(q, r)):
+                                # Centre board at the origin and convert position to cube coordinates
+                                cube_coord = board.axial_to_cube(q - shift, r - shift)
 
-                        # Apply the reflection
-                        refl_cube_coord =[multiplier*c for c in cube_coord]
-                        refl_cube_coord = [refl_cube_coord[i] for i in t]
+                                # Apply the rotation (flip signs and shift the components one place to the right for
+                                # each 60 degree rotation)
+                                rot_cube_coord = np.array(cube_coord)
+                                for i in range(n_rotations):
+                                    rot_cube_coord = np.roll(-rot_cube_coord, 1)
 
-                        # Convert the reflected position to axial coordinates
-                        refl_q, refl_r = board.cube_to_axial(*refl_cube_coord)
+                                # Apply the reflection
+                                refl_cube_coord = [multiplier*c for c in rot_cube_coord]
+                                refl_cube_coord = [refl_cube_coord[i] for i in t]
 
-                        # Update the reflected position on the reflected board
-                        refl_board.board_2d[refl_r, refl_q] = board.board_2d[r, q]
+                                # Convert the reflected position to axial coordinates
+                                refl_q, refl_r = board.cube_to_axial(*refl_cube_coord)
 
-                        # Update policy vector
-                        for move, idx in board.move_map_player_0.items():
-                            # It doesn't matter which player we use since we're not interested in the colour
-                            for action in move:
-                                if action and action[0] == q and action[1] == r:
-                                    refl_pi[idx] = pi[idx]
+                                # Shift the board back to being centred at (size, size)
+                                refl_q, refl_r = refl_q + shift, refl_r + shift
 
-                reflected_forms.append([refl_board, refl_pi])
+                                # print(f'Axial coord: {(q, r)} -> Centred axial coord: {(q - shift, r - shift)} -> Cube coord: {cube_coord} -> Refl cube coord: {tuple(refl_cube_coord)} -> Refl centred axial coord: {(refl_q - shift, refl_r - shift)} -> Refl axial coord: {(refl_q, refl_r)}')
+
+                                # Update the reflected position on the reflected board
+                                refl_board.board_2d[refl_r, refl_q] = board.board_2d[r, q]
+
+                                # Update policy vector
+                                for move, idx in board.move_map_player_0.items():
+                                    # It doesn't matter which player we use since we're not interested in the colour
+                                    for action in move:
+                                        if action and action[0] == q and action[1] == r:
+                                            refl_pi[idx] = pi[idx]
+
+                    reflected_forms.append([refl_board, refl_pi])
 
         return reflected_forms
 

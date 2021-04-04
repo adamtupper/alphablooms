@@ -226,4 +226,24 @@ def test_get_symmetries():
     """Check that the function correctly creates six new reflected boards and
     policy vectors, one for each axis of symmetry.
     """
-    pass
+    game = BloomsGame(size=4, score_target=15)
+    board = game.getInitBoard()
+
+    # Place stones
+    board.place_stone(position=(3, 1), colour=1)
+    board.place_stone(position=(5, 1), colour=2)
+    board.place_stone(position=(3, 5), colour=3)
+    board.place_stone(position=(1, 5), colour=4)
+
+    # board.visualise(show_coords=True, title="Original")
+
+    # Create a dummy policy vector
+    pi = np.random.random_sample(game.getActionSize())
+
+    symmetrical_states = game.getSymmetries(board, pi)
+
+    assert len(symmetrical_states) == 36
+    assert all([sum(x[1]) == sum(pi) for x in symmetrical_states])
+
+    # for relf_board, refl_pi in symmetrical_states:
+    #     relf_board.visualise(show_coords=True)

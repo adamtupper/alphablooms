@@ -1,5 +1,7 @@
 """A board class for the game of Blooms.
 """
+import copy
+
 from itertools import permutations
 
 import matplotlib.pyplot as plt
@@ -31,6 +33,13 @@ class Board:
 
         self.move_map_player_0 = self.build_move_map(player=0)
         self.move_map_player_1 = self.build_move_map(player=1)
+
+    def copy(self):
+        """Create and return a copy of the current board state.
+
+        :return: a copy of the board state.
+        """
+        return copy.deepcopy(self)
 
     def build_move_map(self, player):
         """Build a dictionary that specifies the index of each possible move
@@ -347,10 +356,12 @@ class Board:
 
         return q, r
 
-    def visualise(self, show_coords=False):
+    def visualise(self, show_coords=False, title=""):
         """Visualise the state of the board using matplotlib.
 
         :param show_coords: whether or not to annotate each space with its axial
+            coordinates.
+            :param show_coords: whether or not to annotate each space with its axial
             coordinates.
         """
 
@@ -376,6 +387,8 @@ class Board:
                                     xy=(x, y),
                                     ha='center',
                                     va='center')
+
+        plt.title(title)
         plt.gca().invert_yaxis()
         plt.autoscale(enable=True)
         plt.show()
