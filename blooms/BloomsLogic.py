@@ -376,6 +376,6 @@ class Board:
                                     xy=(x, y),
                                     ha='center',
                                     va='center')
-
+        plt.gca().invert_yaxis()
         plt.autoscale(enable=True)
         plt.show()
