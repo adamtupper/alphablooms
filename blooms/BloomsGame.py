@@ -1,9 +1,13 @@
 """Game class for Blooms.
 """
+import sys
+
+sys.path.append('..')
+
 import numpy as np
 from scipy.special import perm
 
-from blooms.Game import Game  # TODO: Replace with AlphaZero General import
+from Game import Game
 
 from blooms.BloomsLogic import Board
 
@@ -11,6 +15,7 @@ from blooms.BloomsLogic import Board
 class BloomsGame(Game):
     """This class specifies the Game class for Blooms.
     """
+
     def __init__(self, size=4, score_target=15):
         self.size = size
         self.score_target = score_target
@@ -39,7 +44,7 @@ class BloomsGame(Game):
         Returns:
             actionSize: number of all possible actions
         """
-        n_spaces = (3 * self.size**2) - (3 * self.size) + 1
+        n_spaces = (3 * self.size ** 2) - (3 * self.size) + 1
         n_one_stone_moves = 2 * n_spaces
         n_two_stone_moves = perm(n_spaces, 2)
 
@@ -190,7 +195,7 @@ class BloomsGame(Game):
                                     rot_cube_coord = np.roll(-rot_cube_coord, 1)
 
                                 # Apply the reflection
-                                refl_cube_coord = [multiplier*c for c in rot_cube_coord]
+                                refl_cube_coord = [multiplier * c for c in rot_cube_coord]
                                 refl_cube_coord = [refl_cube_coord[i] for i in t]
 
                                 # Convert the reflected position to axial coordinates
