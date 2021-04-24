@@ -55,13 +55,21 @@ class BloomsGame(Game):
         Input:
             board: current board
             player: current player (1 or -1)
-            action: action taken by current player
+            action: the integer index of the action taken by current player
         Returns:
             nextBoard: board after applying action
             nextPlayer: player who plays in the next turn (should be -player)
         """
-        if board.is_legal_move(action):
-            board.execute_move(action, player)
+        board = board.copy()
+
+        # Fetch the action that corresponds to the action index
+        if player == 1:
+            move = board.move_map_player_1.inverse[action]
+        else:
+            move = board.move_map_player_0.inverse[action]
+
+        if board.is_legal_move(move):
+            board.execute_move(move, player)
 
         return board, -player
 
@@ -133,6 +141,8 @@ class BloomsGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
+        board = board.copy()
+
         if player == -1:
             # The board is already in the right POV
             return board
@@ -228,4 +238,4 @@ class BloomsGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        return board.board_2d.tostring()
+        return board.board_2d.tostring() + bytes(board.captures)

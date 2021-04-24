@@ -6,7 +6,8 @@ from itertools import permutations
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import RegularPolygon
+from bidict import bidict
+from matplotlib.patches import Patch, RegularPolygon
 
 
 class Board:
@@ -39,7 +40,10 @@ class Board:
 
         :return: a copy of the board state.
         """
-        return copy.deepcopy(self)
+        duplicate = copy.copy(self)
+        duplicate.board_2d = np.copy(self.board_2d)
+        duplicate.captures = copy.deepcopy(self.captures)
+        return duplicate
 
     def build_move_map(self, player):
         """Build a dictionary that specifies the index of each possible move
@@ -51,7 +55,7 @@ class Board:
             vector of valid moves.
         """
         all_moves = self.get_legal_moves(player)
-        move_map = {m: i for i, m in enumerate(all_moves)}
+        move_map = bidict({m: i for i, m in enumerate(all_moves)})
 
         return move_map
 
@@ -244,18 +248,18 @@ class Board:
             if self.is_fenced(bloom):
                 bloom = list(bloom)
 
-                # Remove stones from the board
-                for position in bloom:
-                    self.remove_stone(position)
-
                 # Update captures
                 bloom_colour = self.board_2d[bloom[0][1], bloom[0][0]]
-                if bloom_colour in (1, 2):
+                if bloom_colour in self.colours[0]:
                     # Bloom belongs to Player 1, so increment Player 2's captures
                     self.captures[1] += len(bloom)
                 else:
                     # Bloom belongs to Player 2, so increment Player 1's captures
                     self.captures[0] += len(bloom)
+
+                # Remove stones from the board
+                for position in bloom:
+                    self.remove_stone(position)
 
     def is_fenced(self, bloom):
         """Check to see if the given bloom is fenced.
@@ -379,7 +383,8 @@ class Board:
                                              radius=1.75 * np.sqrt(1 / 3),
                                              alpha=0.2,
                                              edgecolor='k',
-                                             facecolor=face_colour)
+                                             facecolor=face_colour,
+                                             label='Player 1' if 0 < colour <= 2 else 'Player 2')
                     ax.add_patch(hexagon)
 
                     if show_coords:
@@ -388,7 +393,13 @@ class Board:
                                     ha='center',
                                     va='center')
 
+        legend_elements = [Patch(facecolor='C1', edgecolor='w', alpha=0.2, label='Player -1'),
+                           Patch(facecolor='C2', edgecolor='w', alpha=0.2, label='Player -1'),
+                           Patch(facecolor='C3', edgecolor='w', alpha=0.2, label='Player 1'),
+                           Patch(facecolor='C4', edgecolor='w', alpha=0.2, label='Player 1')]
+
         plt.title(title)
+        ax.legend(handles=legend_elements, ncol=4)
         plt.gca().invert_yaxis()
         plt.autoscale(enable=True)
         plt.show()
