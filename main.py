@@ -7,6 +7,8 @@ from blooms.BloomsGame import BloomsGame as Game
 from blooms.pytorch.NNet import NNetWrapper as nn
 from utils import *
 
+logging.basicConfig(filename='logs.log', level=logging.DEBUG)
+
 log = logging.getLogger(__name__)
 
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
