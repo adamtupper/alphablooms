@@ -1,9 +1,13 @@
 """Game class for Blooms.
 """
+import sys
+
+sys.path.append('..')
+
 import numpy as np
 from scipy.special import perm
 
-from blooms.Game import Game  # TODO: Replace with AlphaZero General import
+from Game import Game
 
 from blooms.BloomsLogic import Board
 
@@ -11,6 +15,7 @@ from blooms.BloomsLogic import Board
 class BloomsGame(Game):
     """This class specifies the Game class for Blooms.
     """
+
     def __init__(self, size=4, score_target=15):
         self.size = size
         self.score_target = score_target
@@ -39,7 +44,7 @@ class BloomsGame(Game):
         Returns:
             actionSize: number of all possible actions
         """
-        n_spaces = (3 * self.size**2) - (3 * self.size) + 1
+        n_spaces = (3 * self.size ** 2) - (3 * self.size) + 1
         n_one_stone_moves = 2 * n_spaces
         n_two_stone_moves = perm(n_spaces, 2)
 
@@ -50,13 +55,21 @@ class BloomsGame(Game):
         Input:
             board: current board
             player: current player (1 or -1)
-            action: action taken by current player
+            action: the integer index of the action taken by current player
         Returns:
             nextBoard: board after applying action
             nextPlayer: player who plays in the next turn (should be -player)
         """
-        if board.is_legal_move(action):
-            board.execute_move(action, player)
+        board = board.copy()
+
+        # Fetch the action that corresponds to the action index
+        if player == 1:
+            move = board.move_map_player_1.inverse[action]
+        else:
+            move = board.move_map_player_0.inverse[action]
+
+        if board.is_legal_move(move):
+            board.execute_move(move, player)
 
         return board, -player
 
@@ -128,6 +141,8 @@ class BloomsGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
+        board = board.copy()
+
         if player == -1:
             # The board is already in the right POV
             return board
@@ -190,7 +205,7 @@ class BloomsGame(Game):
                                     rot_cube_coord = np.roll(-rot_cube_coord, 1)
 
                                 # Apply the reflection
-                                refl_cube_coord = [multiplier*c for c in rot_cube_coord]
+                                refl_cube_coord = [multiplier * c for c in rot_cube_coord]
                                 refl_cube_coord = [refl_cube_coord[i] for i in t]
 
                                 # Convert the reflected position to axial coordinates
@@ -223,4 +238,4 @@ class BloomsGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        return board.board_2d.tostring()
+        return board.board_2d.tostring() + bytes(board.captures)

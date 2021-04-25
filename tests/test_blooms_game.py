@@ -76,9 +76,10 @@ def test_get_next_state_invalid_move():
     initial_board_array = board.get_board_3d()
 
     # Attempt an illegal move
-    player = 1
-    move = [(6, 2, 2), ()]
-    next_board, next_player = game.getNextState(board, player=1, action=move)
+    player = -1
+    move = ((6, 2, 2), ())
+    move_idx = board.move_map_player_0[move]
+    next_board, next_player = game.getNextState(board, player, action=move_idx)
 
     post_move_board_array = next_board.get_board_3d()
 
@@ -93,9 +94,10 @@ def test_get_next_state_valid_move():
     board = game.getInitBoard()
 
     # Attempt a legal move
-    player = 1
-    move = [(6, 2, 2), ()]
-    next_board, next_player = game.getNextState(board, player, action=move)
+    player = -1
+    move = ((6, 2, 2), ())
+    move_idx = board.move_map_player_0[move]
+    next_board, next_player = game.getNextState(board, player, action=move_idx)
 
     next_board.board_2d
     for r in range(next_board.board_2d.shape[0]):
