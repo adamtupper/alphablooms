@@ -21,7 +21,7 @@ import Arena
 from MCTS import MCTS
 
 from blooms.BloomsGame import BloomsGame
-from blooms.BloomsPlayers import RandomPlayer
+from blooms.BloomsPlayers import RandomPlayer, GreedyPlayer
 from blooms.pytorch.NNet import NNetWrapper as BloomsPyTorchNNet
 
 import numpy as np
@@ -30,7 +30,7 @@ from utils import *
 class TestAllGames(unittest.TestCase):
 
     @staticmethod
-    def execute_game_test(game, neural_net):
+    def execute_game_test_random(game, neural_net):
         rp = RandomPlayer(game).play
 
         args = dotdict({'numMCTSSims': 25, 'cpuct': 1.0})
@@ -38,10 +38,30 @@ class TestAllGames(unittest.TestCase):
         n1p = lambda x: np.argmax(mcts.getActionProb(x, temp=0))
 
         arena = Arena.Arena(n1p, rp, game)
-        print(arena.playGames(2, verbose=True))
+        print('Random Opponent...')
+        wins, losses, draws = arena.playGames(2, verbose=False)
+        print(f'Wins = {wins}')
+        print(f'Losses = {losses}')
+        print(f'Draws = {draws}')
+
+    @staticmethod
+    def execute_game_test_greedy(game, neural_net):
+        gp = GreedyPlayer(game).play
+
+        args = dotdict({'numMCTSSims': 25, 'cpuct': 1.0})
+        mcts = MCTS(game, neural_net(game), args)
+        n1p = lambda x: np.argmax(mcts.getActionProb(x, temp=0))
+
+        arena = Arena.Arena(n1p, gp, game)
+        print('Greedy Opponent...')
+        wins, losses, draws = arena.playGames(2, verbose=False)
+        print(f'Wins = {wins}')
+        print(f'Losses = {losses}')
+        print(f'Draws = {draws}')
 
     def test_blooms_pytorch(self):
-        self.execute_game_test(BloomsGame(), BloomsPyTorchNNet)
+        self.execute_game_test_random(BloomsGame(), BloomsPyTorchNNet)
+        self.execute_game_test_greedy(BloomsGame(), BloomsPyTorchNNet)
 
 
 if __name__ == '__main__':
