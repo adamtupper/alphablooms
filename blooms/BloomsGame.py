@@ -193,43 +193,66 @@ class BloomsGame(Game):
                     refl_board = board.copy()
                     refl_pi = pi.copy()
 
+                    # Update board
                     for q in range(board.board_2d.shape[0]):
                         for r in range(board.board_2d.shape[0]):
                             if board.is_valid_space(position=(q, r)):
-                                # Centre board at the origin and convert position to cube coordinates
-                                cube_coord = board.axial_to_cube(q - shift, r - shift)
-
-                                # Apply the rotation (flip signs and shift the components one place to the right for
-                                # each 60 degree rotation)
-                                rot_cube_coord = np.array(cube_coord)
-                                for i in range(n_rotations):
-                                    rot_cube_coord = np.roll(-rot_cube_coord, 1)
-
-                                # Apply the reflection
-                                refl_cube_coord = [multiplier * c for c in rot_cube_coord]
-                                refl_cube_coord = [refl_cube_coord[i] for i in t]
-
-                                # Convert the reflected position to axial coordinates
-                                refl_q, refl_r = board.cube_to_axial(*refl_cube_coord)
-
-                                # Shift the board back to being centred at (size, size)
-                                refl_q, refl_r = refl_q + shift, refl_r + shift
+                                # Transform coordinate
+                                refl_q, refl_r = self.apply_symmetric_transform(board, shift, q, r, n_rotations, t)
 
                                 # print(f'Axial coord: {(q, r)} -> Centred axial coord: {(q - shift, r - shift)} -> Cube coord: {cube_coord} -> Refl cube coord: {tuple(refl_cube_coord)} -> Refl centred axial coord: {(refl_q - shift, refl_r - shift)} -> Refl axial coord: {(refl_q, refl_r)}')
 
                                 # Update the reflected position on the reflected board
                                 refl_board.board_2d[refl_r, refl_q] = board.board_2d[r, q]
 
-                                # Update policy vector
-                                for move, idx in board.move_map_player_0.items():
-                                    # It doesn't matter which player we use since we're not interested in the colour
-                                    for action in move:
-                                        if action and action[0] == q and action[1] == r:
-                                            refl_pi[idx] = pi[idx]
+                    # Update policy vector
+                    for move, move_idx in board.move_map_player_0.items():
+                        # It doesn't matter which player we use since we're not interested in the colour
+                        refl_move = []
+                        for action in move:
+                            if action:
+                                refl_q, refl_r = self.apply_symmetric_transform(board, shift, action[0], action[1], n_rotations, t)
+                                refl_move.append((refl_q, refl_r, action[2]))
+                            else:
+                                refl_move.append(tuple())
+
+                        refl_move_idx = board.move_map_player_0[tuple(refl_move)]
+                        refl_pi[refl_move_idx] = pi[move_idx]
 
                     reflected_forms.append([refl_board, refl_pi])
 
         return reflected_forms
+
+    def apply_symmetric_transform(self, board, shift, q, r, n_rotations, refl_transform):
+        """Apply a rotational and reflective transform to a given position
+        (q, r).
+
+        :param q: the q component of the positions axial coordinate.
+        :param r: the r component of the positions axial coordinate.
+        :param n_rotations: the number of 60 degree rotations to perform.
+        :param relf_transform: the reflective transform to perform.
+
+        :return: a tuple containing the reflected axial coordinates.
+        """
+        # Centre board at the origin and convert position to cube coordinates
+        cube_coord = board.axial_to_cube(q - shift, r - shift)
+
+        # Apply the rotation (flip signs and shift the components one place to the right for
+        # each 60 degree rotation)
+        rot_cube_coord = np.array(cube_coord)
+        for i in range(n_rotations):
+            rot_cube_coord = np.roll(-rot_cube_coord, 1)
+
+        # Apply the reflection
+        refl_cube_coord = [rot_cube_coord[i] for i in refl_transform]
+
+        # Convert the reflected position to axial coordinates
+        refl_q, refl_r = board.cube_to_axial(*refl_cube_coord)
+
+        # Shift the board back to being centred at (size, size)
+        refl_q, refl_r = refl_q + shift, refl_r + shift
+
+        return refl_q, refl_r
 
     def stringRepresentation(self, board):
         """
