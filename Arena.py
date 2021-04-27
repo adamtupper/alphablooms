@@ -41,11 +41,16 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
+
+        if verbose:
+            board.visualise(show_coords=True, title=f"Starting State")
+
         while self.game.getGameEnded(board, curPlayer) == 0:
             it += 1
+
             if verbose:
-                print("Turn ", str(it), "Player ", str(curPlayer), "Captures ", str(board.captures))
-                board.visualise(show_coords=True, title=f"Turn {it}")
+                print("Turn ", str(it), "Player ", str(curPlayer))
+
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
 
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1)
@@ -55,6 +60,14 @@ class Arena():
                 log.debug(f'valids = {valids}')
                 assert valids[action] > 0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
+
+            if verbose and curPlayer == -1:
+                print("Action", board.move_map_player_1.inverse[action], "Captures ", str(board.captures))
+                board.visualise(show_coords=True, title=f"Turn {it}")
+            elif verbose:
+                print("Action", board.move_map_player_0.inverse[action], "Captures ", str(board.captures))
+                board.visualise(show_coords=True, title=f"Turn {it}")
+
         if verbose:
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)), "Captures ", str(board.captures))
             board.visualise(show_coords=True, title="Final State")
@@ -71,18 +84,18 @@ class Arena():
             draws:  games won by nobody
         """
 
-        num = int(num / 2)
-        oneWon = 0
-        twoWon = 0
-        draws = 0
-        for _ in tqdm(range(num), desc="Arena.playGames (1)"):
-            gameResult = self.playGame(verbose=verbose)
-            if gameResult == 1:
-                oneWon += 1
-            elif gameResult == -1:
-                twoWon += 1
-            else:
-                draws += 1
+        # num = int(num / 2)
+        # oneWon = 0
+        # twoWon = 0
+        # draws = 0
+        # for _ in tqdm(range(num), desc="Arena.playGames (1)"):
+        #     gameResult = self.playGame(verbose=verbose)
+        #     if gameResult == 1:
+        #         oneWon += 1
+        #     elif gameResult == -1:
+        #         twoWon += 1
+        #     else:
+        #         draws += 1
 
         self.player1, self.player2 = self.player2, self.player1
 
