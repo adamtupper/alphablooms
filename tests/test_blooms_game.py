@@ -244,7 +244,7 @@ def test_get_symmetries():
 
     symmetrical_states = game.getSymmetries(board, pi)
 
-    assert len(symmetrical_states) == 36
+    assert len(symmetrical_states) == 24
     assert all([sum(x[1]) == sum(pi) for x in symmetrical_states])
 
     # for relf_board, refl_pi in symmetrical_states:

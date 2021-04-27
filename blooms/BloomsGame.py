@@ -180,6 +180,7 @@ class BloomsGame(Game):
         shift = self.size - 1
         transforms = [
             # new x, new y, new z
+            (0, 1, 2),
             (1, 0, 2),
             (2, 1, 0),
             (0, 2, 1)
@@ -187,7 +188,7 @@ class BloomsGame(Game):
 
         reflected_forms = []
         for t in transforms:
-            for multiplier in [-1, 1]:
+            for multiplier in [1]:
                 for n_rotations in range(0, 6):
                     refl_board = board.copy()
                     refl_pi = pi.copy()
