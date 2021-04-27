@@ -182,7 +182,7 @@ def test_get_canonical_form_no_inversion():
     # Update captures
     board.captures = [5, 10]
 
-    board = game.getCanonicalForm(board, player=-1)
+    board = game.getCanonicalForm(board, player=1)
 
     assert board.board_2d[1, 5] == 1
     assert board.board_2d[2, 5] == 2
@@ -211,7 +211,7 @@ def test_get_canonical_form_inversion():
     # Uncomment to visualise the inversion
     # board.visualise()
 
-    board = game.getCanonicalForm(board, player=1)
+    board = game.getCanonicalForm(board, player=-1)
 
     assert board.board_2d[1, 5] == 3
     assert board.board_2d[2, 5] == 4

@@ -126,8 +126,8 @@ class BloomsGame(Game):
             return 1e-4
 
     def getCanonicalForm(self, board, player):
-        """The canonical form of the board is from the POV of Player -1. When
-        the player is Player 1, we need to reverse the colours of the stones on
+        """The canonical form of the board is from the POV of Player 1. When
+        the player is Player -1, we need to reverse the colours of the stones on
         the board (i.e. 1 <-> 3, 2 <-> 4) and reverse the number of captures.
 
         Input:
@@ -143,7 +143,7 @@ class BloomsGame(Game):
         """
         board = board.copy()
 
-        if player == -1:
+        if player == 1:
             # The board is already in the right POV
             return board
         else:
