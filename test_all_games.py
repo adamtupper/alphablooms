@@ -39,7 +39,7 @@ class TestAllGames(unittest.TestCase):
 
         arena = Arena.Arena(n1p, rp, game)
         print('Random Opponent...')
-        wins, losses, draws = arena.playGames(2, verbose=False)
+        wins, losses, draws = arena.playGames(2, verbose=True, display=False)
         print(f'Wins = {wins}')
         print(f'Losses = {losses}')
         print(f'Draws = {draws}')
@@ -54,14 +54,14 @@ class TestAllGames(unittest.TestCase):
 
         arena = Arena.Arena(n1p, gp, game)
         print('Greedy Opponent...')
-        wins, losses, draws = arena.playGames(2, verbose=False)
+        wins, losses, draws = arena.playGames(2, verbose=True, display=False)
         print(f'Wins = {wins}')
         print(f'Losses = {losses}')
         print(f'Draws = {draws}')
 
     def test_blooms_pytorch(self):
         self.execute_game_test_random(BloomsGame(), BloomsPyTorchNNet)
-        self.execute_game_test_greedy(BloomsGame(), BloomsPyTorchNNet)
+        # self.execute_game_test_greedy(BloomsGame(), BloomsPyTorchNNet)
 
 
 if __name__ == '__main__':

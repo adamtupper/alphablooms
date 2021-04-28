@@ -41,12 +41,18 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
+
+        if display:
+            board.visualise(show_coords=True, title=f"Starting State")
+
         while self.game.getGameEnded(board, curPlayer) == 0:
             it += 1
+
             if verbose:
                 print("Turn ", str(it), "Player ", str(curPlayer), "Captures ", str(board.captures))
             if display:
                 board.visualise(show_coords=True, title=f"Turn {it}")
+
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
 
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer), 1)
@@ -56,10 +62,20 @@ class Arena():
                 log.debug(f'valids = {valids}')
                 assert valids[action] > 0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
+
+            if verbose and curPlayer == -1:
+                print("Action", board.move_map_player_1.inverse[action], "Captures ", str(board.captures))
+            elif verbose:
+                print("Action", board.move_map_player_0.inverse[action], "Captures ", str(board.captures))
+
+            if display:
+                board.visualise(show_coords=True, title=f"Turn {it}")
+
         if verbose:
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)), "Captures ", str(board.captures))
         if display:
             board.visualise(show_coords=True, title="Final State")
+
         return curPlayer * self.game.getGameEnded(board, curPlayer)
 
     def playGames(self, num, verbose=False, display=False):

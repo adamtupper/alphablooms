@@ -4,6 +4,7 @@ from .context import blooms
 
 import numpy as np
 import pytest
+from pyinstrument import Profiler
 from scipy.special import perm
 
 from blooms.BloomsGame import BloomsGame
@@ -182,7 +183,7 @@ def test_get_canonical_form_no_inversion():
     # Update captures
     board.captures = [5, 10]
 
-    board = game.getCanonicalForm(board, player=-1)
+    board = game.getCanonicalForm(board, player=1)
 
     assert board.board_2d[1, 5] == 1
     assert board.board_2d[2, 5] == 2
@@ -211,7 +212,7 @@ def test_get_canonical_form_inversion():
     # Uncomment to visualise the inversion
     # board.visualise()
 
-    board = game.getCanonicalForm(board, player=1)
+    board = game.getCanonicalForm(board, player=-1)
 
     assert board.board_2d[1, 5] == 3
     assert board.board_2d[2, 5] == 4
@@ -242,10 +243,19 @@ def test_get_symmetries():
     # Create a dummy policy vector
     pi = np.random.random_sample(game.getActionSize())
 
+    profiler = Profiler()
+    profiler.start()
+
     symmetrical_states = game.getSymmetries(board, pi)
 
-    assert len(symmetrical_states) == 36
-    assert all([sum(x[1]) == sum(pi) for x in symmetrical_states])
+    profiler.stop()
+    print(profiler.output_text(unicode=True, color=True))
+
+    assert len(symmetrical_states) == 24
+    assert symmetrical_states[1][1][37] == pi[52]
+    assert symmetrical_states[1][1][614] == pi[1277]
+
+    assert all([sum(x[1]) == pytest.approx(sum(pi)) for x in symmetrical_states])
 
     # for relf_board, refl_pi in symmetrical_states:
     #     relf_board.visualise(show_coords=True)
