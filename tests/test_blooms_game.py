@@ -4,6 +4,7 @@ from .context import blooms
 
 import numpy as np
 import pytest
+from pyinstrument import Profiler
 from scipy.special import perm
 
 from blooms.BloomsGame import BloomsGame
@@ -242,7 +243,13 @@ def test_get_symmetries():
     # Create a dummy policy vector
     pi = np.random.random_sample(game.getActionSize())
 
+    profiler = Profiler()
+    profiler.start()
+
     symmetrical_states = game.getSymmetries(board, pi)
+
+    profiler.stop()
+    print(profiler.output_text(unicode=True, color=True))
 
     assert len(symmetrical_states) == 24
     assert symmetrical_states[1][1][37] == pi[52]

@@ -181,9 +181,9 @@ class BloomsGame(Game):
         transforms = [
             # new x, new y, new z
             (0, 1, 2),
-            # (1, 0, 2),
-            # (2, 1, 0),
-            # (0, 2, 1)
+            (1, 0, 2),
+            (2, 1, 0),
+            (0, 2, 1)
         ]
 
         reflected_forms = []
@@ -193,12 +193,17 @@ class BloomsGame(Game):
                     refl_board = board.copy()
                     refl_pi = pi.copy()
 
+                    cache = {}
+
                     # Update board
                     for q in range(board.board_2d.shape[0]):
                         for r in range(board.board_2d.shape[0]):
                             if board.is_valid_space(position=(q, r)):
                                 # Transform coordinate
                                 refl_q, refl_r = self.apply_symmetric_transform(board, shift, q, r, n_rotations, t)
+
+                                # Cache transformed coordinate
+                                cache[(q, r)] = (refl_q, refl_r)
 
                                 # print(f'Axial coord: {(q, r)} -> Centred axial coord: {(q - shift, r - shift)} -> Cube coord: {cube_coord} -> Refl cube coord: {tuple(refl_cube_coord)} -> Refl centred axial coord: {(refl_q - shift, refl_r - shift)} -> Refl axial coord: {(refl_q, refl_r)}')
 
@@ -211,7 +216,11 @@ class BloomsGame(Game):
                         refl_move = []
                         for action in move:
                             if action:
-                                refl_q, refl_r = self.apply_symmetric_transform(board, shift, action[0], action[1], n_rotations, t)
+                                if (action[0], action[1]) in cache.keys():
+                                    refl_q, refl_r = cache[(action[0], action[1])]
+                                else:
+                                    refl_q, refl_r = self.apply_symmetric_transform(board, shift, action[0], action[1], n_rotations, t)
+
                                 refl_move.append((refl_q, refl_r, action[2]))
                             else:
                                 refl_move.append(tuple())
