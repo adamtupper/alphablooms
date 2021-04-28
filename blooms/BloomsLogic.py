@@ -244,9 +244,11 @@ class Board:
                         blooms.append(bloom)
 
         # Remove any fenced blooms (and increment the # of captured stones)
+        fenced_blooms = []
         for bloom in blooms:
             if self.is_fenced(bloom):
                 bloom = list(bloom)
+                fenced_blooms.append(bloom)
 
                 # Update captures
                 bloom_colour = self.board_2d[bloom[0][1], bloom[0][0]]
@@ -257,9 +259,10 @@ class Board:
                     # Bloom belongs to Player 2, so increment Player 1's captures
                     self.captures[0] += len(bloom)
 
-                # Remove stones from the board
-                for position in bloom:
-                    self.remove_stone(position)
+        # Remove stones from the board
+        for bloom in fenced_blooms:
+            for position in bloom:
+                self.remove_stone(position)
 
     def is_fenced(self, bloom):
         """Check to see if the given bloom is fenced.
