@@ -360,16 +360,16 @@ class Board:
 
         return q, r
 
-    def visualise(self, show_coords=False, title=""):
+    def visualise(self, show_coords=False, title="", filename=""):
         """Visualise the state of the board using matplotlib.
 
         :param show_coords: whether or not to annotate each space with its axial
             coordinates.
-            :param show_coords: whether or not to annotate each space with its axial
-            coordinates.
+        :param title: the title of the plot.
+        :param filename: the filename to save the visualisation to.
         """
 
-        fig, ax = plt.subplots(1)
+        fig, ax = plt.subplots(1, figsize=(5, 5))
         ax.set_aspect('equal')
 
         for q in range(0, self.board_2d.shape[-1]):
@@ -393,13 +393,26 @@ class Board:
                                     ha='center',
                                     va='center')
 
-        legend_elements = [Patch(facecolor='C1', edgecolor='w', alpha=0.2, label='Player -1'),
-                           Patch(facecolor='C2', edgecolor='w', alpha=0.2, label='Player -1'),
-                           Patch(facecolor='C3', edgecolor='w', alpha=0.2, label='Player 1'),
-                           Patch(facecolor='C4', edgecolor='w', alpha=0.2, label='Player 1')]
+        legend_elements = [Patch(facecolor='C1', edgecolor='w', alpha=0.2, label='Player 1'),
+                           Patch(facecolor='C2', edgecolor='w', alpha=0.2, label='Player 1'),
+                           Patch(facecolor='C3', edgecolor='w', alpha=0.2, label='Player 2'),
+                           Patch(facecolor='C4', edgecolor='w', alpha=0.2, label='Player 2')]
+
+        plt.xticks([])
+        plt.yticks([])
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
 
         plt.title(title)
-        ax.legend(handles=legend_elements, ncol=4)
+        plt.legend(handles=legend_elements, handlelength=1, handleheight=1, ncol=4, loc='lower center',
+                   borderaxespad=-0.75, frameon=False)
         plt.gca().invert_yaxis()
         plt.autoscale(enable=True)
+
+        if filename:
+            plt.savefig(filename)
+
         plt.show()
