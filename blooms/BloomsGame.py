@@ -86,6 +86,11 @@ class BloomsGame(Game):
         player = 0 if player == -1 else 1
         valid_moves = board.get_legal_moves(player)
 
+        # Remove two stone moves for the opening move (i.e. when the board is
+        # empty
+        if np.all(board.board_2d == 0):
+            valid_moves = [m for m in valid_moves if not m[1]]
+
         valid_moves_vec = np.zeros(int(self.getActionSize()))
         for move in valid_moves:
             if player == 0:
