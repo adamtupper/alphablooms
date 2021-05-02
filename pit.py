@@ -10,14 +10,14 @@ from blooms.pytorch.NNet import NNetWrapper as NNet
 from utils import *
 
 # WARNING: The game size and score target should match the chosen agent
-game = BloomsGame(size=4, score_target=15)
+game = BloomsGame(size=5, score_target=20)
 human = HumanBloomsPlayer(game).play
 
 # WARNING: The chosen agent should match the game size and score target
 model = NNet(game)
-model.load_checkpoint('./notebooks/checkpoints_run_3', 'checkpoint_1.pth.tar')
+model.load_checkpoint('./notebooks/results/chkpts_board5_24hrs', 'best.pth.tar')
 
-args = dotdict({'numMCTSSims': 50, 'cpuct':1.0})
+args = dotdict({'numMCTSSims': 100, 'cpuct':1.0})
 mcts = MCTS(game, model, args)
 agent = lambda x: np.argmax(mcts.getActionProb(x, temp=0))
 
